@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "zad2": {
+      "commandName": "Project",
+      "commandLineArgs": "https://www.pja.edu.pl/"
+    }
+  }
+}
