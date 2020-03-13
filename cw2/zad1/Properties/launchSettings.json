@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "zad1": {
+      "commandName": "Project",
+      "commandLineArgs": "Z:\\Users\\siemn\\Documents\\PJATK\\APBD\\cw2\\zad1\\data1.csv D:\\Users\\siemn\\Documents\\PJATK\\APBD\\cw2\\zad1\\resson.json json"
+    }
+  }
+}
