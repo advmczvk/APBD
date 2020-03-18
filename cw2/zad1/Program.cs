@@ -131,7 +131,7 @@ namespace zad1
         }
         public static void Log(string msg)
         {
-            using (var writer = new StreamWriter(@"..\..\..\log.txt", false))
+            using (var writer = new StreamWriter(@"..\..\..\log.txt", true))
             {
                 writer.WriteLine(msg);
             }
