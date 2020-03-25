@@ -15,15 +15,14 @@ namespace cw3.DAL
             _students = new List<Student>();
         }
 
-        public IEnumerable<Student> GetStudents(string index)
+        public IEnumerable<Student> GetStudents()
         {
-            using (var client = new SqlConnection("[SqlConnection]"))
+            using (var client = new SqlConnection("Data Source=db-mssql;Initial Catalog=s18730;Integrated Security=True"))
             using (var com = new SqlCommand())
             {
                 _students.Clear();
                 com.Connection = client;
-                com.CommandText = "select * from Student where IndexNumber = @index";
-                com.Parameters.AddWithValue("id", index);
+                com.CommandText = "select * from Student";
                 client.Open();
                 var dr = com.ExecuteReader();
                 while (dr.Read())
@@ -41,14 +40,14 @@ namespace cw3.DAL
 
             return _students;
         }
-        public IEnumerable<Enrollment> GetStudentEnrollment(string index)
+        public IEnumerable<Enrollment> GetEnrollment(string index)
         {
-            using (var client = new SqlConnection("[SqlConnection]"))
+            using (var client = new SqlConnection("Data Source=db-mssql;Initial Catalog=s18730;Integrated Security=True"))
             using (var com = new SqlCommand())
             {
                 com.Connection = client;
-                com.CommandText = "select Semester, IdStudy, StartDate from Enrollment where IdEnrollment = (select IdEnrollment from student where IndexNumber = @id)";
-                com.Parameters.AddWithValue("id", index);
+                com.CommandText = "select Semester, IdStudy, StartDate from Enrollment where IdEnrollment = (select IdEnrollment from student where IndexNumber = @index)";
+                com.Parameters.AddWithValue("index", index);
 
                 client.Open();
                 var dr = com.ExecuteReader();
@@ -95,6 +94,32 @@ namespace cw3.DAL
                 {
                     _students.ToList().Remove(student);
                 }
+            }
+        }
+
+        public Student GetStudent(string index)
+        {
+            using (var client = new SqlConnection("Data Source=db-mssql;Initial Catalog=s18730;Integrated Security=True"))
+            using (var com = new SqlCommand())
+            {
+                _students.Clear();
+                com.Connection = client;
+                com.CommandText = "select * from Student where IndexNumber = @index";
+                com.Parameters.AddWithValue("index", index);
+                client.Open();
+                var dr = com.ExecuteReader();
+                Student st = null;
+                while (dr.Read())
+                {
+                    st = new Student()
+                    {
+                        FirstName = dr["FirstName"].ToString(),
+                        LastName = dr["LastName"].ToString(),
+                        IndexNumber = dr["IndexNumber"].ToString()
+                    };
+                }
+                
+                return st;
             }
         }
     }
