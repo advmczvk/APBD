@@ -19,23 +19,15 @@ namespace cw3.Controllers
             _dbService = dbService;
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetStudent(int id)
+        [HttpGet("{index}")]
+        public IActionResult GetStudents(string index)
         {
-           if(id == 1)
-            {
-                return Ok("Kowalski");
-            }
-           else if (id == 2)
-            {
-                return Ok("Malewski");
-            }
-            return NotFound("Nie znaleziono studenta");
+            return Ok(_dbService.GetStudents(index));
         }
-        [HttpGet]
-        public IActionResult GetStudents()
+        [HttpGet("getEnrollment/{index}")]
+        public IActionResult getStudentEnrollment(string index)
         {
-            return Ok(_dbService.GetStudents());
+            return Ok(_dbService.GetStudentEnrollment(index));
         }
         [HttpPost]
         public IActionResult CreateStudent(Student student)
@@ -44,7 +36,7 @@ namespace cw3.Controllers
             return Ok(student);
         }
         [HttpPut("{id}")]
-        public IActionResult UpdateStudent(int id, string varType, string value)
+        public IActionResult UpdateStudent(string id, string varType, string value)
         {   
             return Ok($"Zaktualizowano studenta {_dbService.UpdateStudent(id, varType, value)}");
         }
