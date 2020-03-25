@@ -7,8 +7,9 @@ namespace cw3.DAL
 {
     public interface IDbService
     {
-        public IEnumerable<Student> GetStudents();
-        public Student UpdateStudent(int id, string varType, string value);
-        public void DeleteStudent(int id);
+        public IEnumerable<Student> GetStudents(string index);
+        public Student UpdateStudent(string id, string varType, string value);
+        public void DeleteStudent(string id);
+        IEnumerable<Enrollment> GetStudentEnrollment(string index);
     }
 }

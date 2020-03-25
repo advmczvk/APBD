@@ -2,31 +2,77 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace cw3.DAL
 {
     public class MockDbService : IDbService
     {
-        private static IEnumerable<Student> _students;
-        static MockDbService()
+        public List<Student> _students;
+        public MockDbService()
         {
-            _students = new List<Student>
-            {
-                new Student{IdStudent=1, FirstName="Jan", LastName="Kowalski"},
-                new Student{IdStudent=2, FirstName="Anna", LastName="Malewski"},
-                new Student{IdStudent=3, FirstName="Andrzej", LastName="Andrzejewski"}
-            };
+            _students = new List<Student>();
         }
-        public IEnumerable<Student> GetStudents()
+
+        public IEnumerable<Student> GetStudents(string index)
         {
+            using (var client = new SqlConnection("[SqlConnection]"))
+            using (var com = new SqlCommand())
+            {
+                _students.Clear();
+                com.Connection = client;
+                com.CommandText = "select * from Student where IndexNumber = @index";
+                com.Parameters.AddWithValue("id", index);
+                client.Open();
+                var dr = com.ExecuteReader();
+                while (dr.Read())
+                {
+                    var st = new Student()
+                    {
+                        FirstName = dr["FirstName"].ToString(),
+                        LastName = dr["LastName"].ToString(),
+                        IndexNumber = dr["IndexNumber"].ToString()
+                    };
+                    
+                    _students.Add(st);
+                }
+            }
+
             return _students;
         }
-        public Student UpdateStudent(int id, string varType, string value)
+        public IEnumerable<Enrollment> GetStudentEnrollment(string index)
+        {
+            using (var client = new SqlConnection("[SqlConnection]"))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = client;
+                com.CommandText = "select Semester, IdStudy, StartDate from Enrollment where IdEnrollment = (select IdEnrollment from student where IndexNumber = @id)";
+                com.Parameters.AddWithValue("id", index);
+
+                client.Open();
+                var dr = com.ExecuteReader();
+                var enrollments = new List<Enrollment>();
+                while (dr.Read())
+                {
+                    var enrol = new Enrollment()
+                    {
+                        sem = int.Parse(dr["Semester"].ToString()),
+                        idStud = int.Parse(dr["IdStudy"].ToString()),
+                        date = dr["StartDate"].ToString()
+                    };
+                    
+                    enrollments.Add(enrol);
+                }
+                return enrollments;
+            }
+        }
+        public Student UpdateStudent(string id, string varType, string value)
         {
             
             foreach(var student in _students)
             {
-                if(student.IdStudent == id)
+                if(student.IndexNumber == id)
                 {
                     if (varType == "name")
                     {
@@ -41,11 +87,11 @@ namespace cw3.DAL
             }
             return null; 
         }
-        public void DeleteStudent(int id)
+        public void DeleteStudent(string id)
         {
             foreach(var student in _students)
             {
-                if(student.IdStudent == id)
+                if(student.IndexNumber == id)
                 {
                     _students.ToList().Remove(student);
                 }
