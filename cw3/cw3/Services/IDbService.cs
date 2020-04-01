@@ -15,5 +15,6 @@ namespace cw3.DAL
         IEnumerable<Enrollment> GetEnrollment(string index);
         public Student GetStudent(string index);
         public IActionResult EnrollStudent(EnrollStudentRequest request);
+        public IActionResult PromoteStudent(PromoteStudentRequest request);
     }
 }

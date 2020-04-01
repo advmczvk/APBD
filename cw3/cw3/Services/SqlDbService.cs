@@ -3,6 +3,8 @@ using System.Linq;
 using System.Data.SqlClient;
 using cw3.DTOs.Requests;
 using Microsoft.AspNetCore.Mvc;
+using cw3.DTOs.Responses;
+using System;
 
 namespace cw3.DAL
 {
@@ -156,7 +158,7 @@ namespace cw3.DAL
                     int idstudies = (int)dr["IdStudy"];
                     dr.Close();
                     com.CommandText = "select e.IdEnrollment, e.Semester, e.IdStudy, e.StartDate from Enrollment e join Studies s on e.idStudy = s.IdStudy where e.semester=1 and s.name=@name;";
-                    //com.Parameters.AddWithValue("name", request.studies);
+                    
                     int idEnrollment;
                     dr = com.ExecuteReader();
                     if (!dr.Read())
@@ -169,7 +171,6 @@ namespace cw3.DAL
                     }
                     dr.Close();    
                     com.CommandText = "select e.IdEnrollment, e.Semester, e.IdStudy, e.StartDate from Enrollment e join Studies s on e.idStudy = s.IdStudy where e.semester=1 and s.name=@name;";
-                    //com.Parameters.AddWithValue("name", request.studies);
                     dr = com.ExecuteReader();
                     dr.Read();
                     idEnrollment = (int)dr["IdEnrollment"];
@@ -187,20 +188,68 @@ namespace cw3.DAL
                     dr.Close();
 
                     com.CommandText = "INSERT INTO Student(IndexNumber, FirstName, LastName, BirthDate, IdEnrollment) VALUES(@Index, @Fname, @Lname, @BirthDate, @IdEnrollment)";
-                    //com.Parameters.AddWithValue("Index", request.indexNUmber);
                     com.Parameters.AddWithValue("Fname", request.firstName);
                     com.Parameters.AddWithValue("Lname", request.lastName);
                     com.Parameters.AddWithValue("BirthDate", request.birthDate);
                     com.Parameters.AddWithValue("IdEnrollment", idEnrollment);
                     com.ExecuteNonQuery();
                     tran.Commit();
+                    
                 }
                 catch (SqlException e)
                 {
                     tran.Rollback();
                     return BadRequest(e);
                 }
-                return StatusCode(201, "Student dodany pomyślnie");
+                var response = new EnrollStudentResponse()
+                {
+                    lastName = request.lastName,
+                    semester = 1,
+                    startDate = DateTime.Now
+                };
+                return StatusCode(201, response);
+            }
+        }
+        public IActionResult PromoteStudent(PromoteStudentRequest request)
+        {
+            using (var con = new SqlConnection("Data Source=db-mssql;Initial Catalog=s18730;Integrated Security=True"))
+            using (var com = new SqlCommand())
+            {
+                com.Connection = con;
+                con.Open();
+                var tran = con.BeginTransaction();
+                com.Transaction = tran;
+
+                try
+                {
+                    com.CommandText = "select e.IdEnrollment from Enrollment e join Studies s on e.idstudy = s.idstudy where s.name=@name and e.semester=@semester;";
+                    com.Parameters.AddWithValue("name", request.studies);
+                    com.Parameters.AddWithValue("semester", request.semester);
+
+                    var dr = com.ExecuteReader();
+                    if (!dr.Read())
+                    {
+                        dr.Close();
+                        tran.Rollback();
+                        return StatusCode(404, "Brak powiązania");
+                    }
+                    dr.Close();
+                    com.CommandText = "EXEC PromoteStudent @name, @semester;";
+                    dr = com.ExecuteReader();
+                    dr.Read();
+                    var response = new PromoteStudentResponse()
+                    {
+                        idEnrollment = (int)dr["IdEnrollment"],
+                        studies = (string)dr["name"],
+                        semester = (int)dr["semester"]
+                    };
+                    return StatusCode(201, response);
+                }
+                catch(SqlException e)
+                {
+                    tran.Rollback();
+                    return BadRequest(e);
+                }
             }
         }
     }
