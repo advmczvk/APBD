@@ -37,7 +37,7 @@ namespace cw3.Controllers
         [HttpPost]
         public IActionResult CreateStudent(Student student)
         {
-            student.IndexNumber = $"s{new Random().Next(1, 2000)}";
+            student.index = $"s{new Random().Next(1, 2000)}";
             return Ok(student);
         }
         [HttpPut("{id}")]
